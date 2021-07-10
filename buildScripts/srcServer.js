@@ -1,27 +1,39 @@
-import express from 'express';
-import path from 'path';
-import open from 'open';
-import webpack from 'webpack';
-import config from '../webpack.config.dev.js'
 
-const port = 3000;
-const app = express();
-const compiler = webpack(config);
+const puppeteer = require('puppeteer');
+const pages = [];
+let browser;
+let captureCount = 0;
+(async () => {
+  browser = await puppeteer.launch({headless: false});
+  await navigate('https://www.example.com/resume');
+  await click('h2 + ul > li:last-child a');
+  await capture();
+  await navigate('http://yahoo.com', true);
+  await capture();
+})();
 
-app.get('/', function (req, res) {
-  res.sendFile(path.join(__dirname,'../src/index.html'));
-});
+function getCurrentPage(){
+  return pages.length ? pages[pages.length - 1] : null;
+}
 
-app.use(require('webpack-dev-middleware')(compiler, {
-  nInfo: true,
-  publicPath: config.output.publicPath
-}));
-
-app.listen(port, function (err) {
-  if (err) {
-    console.log(err);
+async function navigate(url, newPage=false){
+  const page = await browser.newPage();
+  if(!getCurrentPage() || newPage){
+    pages.push(page);
   }
-  else {-
-    open('http://localhost:'+port);
-  }
-});
+  await getCurrentPage().goto(url);
+}
+
+async function enterText(selector, text){
+  await getCurrentPage().type(selector, text);
+}
+
+async function click(selector){
+  const htmlEl = await getCurrentPage().$(selector);
+  await htmlEl.click();
+}
+
+async function capture(){
+  captureCount++;
+  await getCurrentPage().screenshot({ path: `capture-${captureCount}.png` });
+}
