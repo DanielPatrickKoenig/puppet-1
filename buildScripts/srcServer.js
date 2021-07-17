@@ -5,11 +5,7 @@ let browser;
 let captureCount = 0;
 (async () => {
   browser = await puppeteer.launch({headless: false});
-  await navigate('https://www.example.com/resume');
-  await click('h2 + ul > li:last-child a');
-  await capture();
-  await navigate('http://yahoo.com', true);
-  await capture();
+  await navigate('https://www.github.com/login');
 })();
 
 function getCurrentPage(){
@@ -36,4 +32,10 @@ async function click(selector){
 async function capture(){
   captureCount++;
   await getCurrentPage().screenshot({ path: `capture-${captureCount}.png` });
+}
+
+async function basicLogin({ usernameSelector, username}, { passwordSelector, password }, submitSelector){
+  await enterText(usernameSelector, username);
+  await enterText(passwordSelector, password);
+  await click(submitSelector);
 }
