@@ -6,8 +6,8 @@ let captureCount = 0;
 (async () => {
   browser = await puppeteer.launch({headless: false});
   // await navigate('https://www.github.com/login');
-  const username = '';
-  const password = '';
+  const username = 'DanielPatrickKoenig';
+  const password = 'K@!ch30nglu';
   const actions = [
     {
       actionType: ActionTypes.NAVIGATE,
@@ -29,7 +29,7 @@ let captureCount = 0;
     },
     {
       actionType: ActionTypes.NAVIGATE,
-      url: 'https://github.com/DanielPatrickKoenig?tab=repositories'
+      url: `https://github.com/${username}?tab=repositories`
     },
     {
       actionType: ActionTypes.CLICK,
