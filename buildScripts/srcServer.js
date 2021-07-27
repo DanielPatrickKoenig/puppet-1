@@ -1,58 +1,24 @@
-
+import actions from './actions.js';
+import ActionTypes from './actionTypes.js';
 const puppeteer = require('puppeteer');
-const pages = [];
+let windowIndex = 0;
 let browser;
 let captureCount = 0;
 (async () => {
   browser = await puppeteer.launch({headless: false});
-  // await navigate('https://www.github.com/login');
-  const username = '';
-  const password = '';
-  const actions = [
-    {
-      actionType: ActionTypes.NAVIGATE,
-      url: 'https://www.github.com/login'
-    },
-    {
-      actionType: ActionTypes.ENTER_TEXT,
-      selector: '#login_field',
-      content: username
-    },
-    {
-      actionType: ActionTypes.ENTER_TEXT,
-      selector: '#password',
-      content: password
-    },
-    {
-      actionType: ActionTypes.CLICK,
-      selector: '#password ~ .btn'
-    },
-    {
-      actionType: ActionTypes.NAVIGATE,
-      url: `https://github.com/${username}?tab=repositories`
-    },
-    {
-      actionType: ActionTypes.CLICK,
-      selector: '.js-profile-editable-replace a, h2 a'
-    }
-  ];
   await actionChain(actions);
 })();
 
-const ActionTypes = {
-  NAVIGATE: 0,
-  CLICK: 1,
-  ENTER_TEXT: 2
-};
+
 
 async function getCurrentPage(){
   const pages = await browser.pages();
-  return pages[0];
+  return pages[windowIndex];
 }
 
-async function navigate(url, newPage=false){
+async function navigate(url){
   const pages = await browser.pages();
-  await pages[0].goto(url);
+  await pages[windowIndex].goto(url);
 }
 
 async function enterText(selector, text){
@@ -69,6 +35,30 @@ async function enterText(selector, text){
     }, 1000);
   }
   return status;
+}
+
+async function mouseClick({ x, y }) {
+  const page = await getCurrentPage();
+  page.mouse.click(x, y);
+  return 1;
+}
+
+async function mouseDown() {
+  const page = await getCurrentPage();
+  page.mouse.down();
+  return 1;
+}
+
+async function mouseMove({ x, y }) {
+  const page = await getCurrentPage();
+  page.mouse.move(x, y);
+  return 1;
+}
+
+async function mouseUp() {
+  const page = await getCurrentPage();
+  page.mouse.up();
+  return 1;
 }
 
 async function click(selector){
@@ -103,11 +93,28 @@ async function actionChain(chain, index){
       break;
     }
     case ActionTypes.CLICK:{
-      status = await click(currentAction.selector);
+      status = currentAction.selector ? await click(currentAction.selector) : await mouseClick(currentAction.position);
+      break;
+    }
+    case ActionTypes.MOUSE_DOWN:{
+      status = await mouseDown();
+      break;
+    }
+    case ActionTypes.MOUSE_MOVE:{
+      status = await mouseMove(currentAction.position);
+      break;
+    }
+    case ActionTypes.MOUSE_UP:{
+      status = await mouseUp();
       break;
     }
     case ActionTypes.ENTER_TEXT:{
       status = await enterText(currentAction.selector, currentAction.content);
+      break;
+    }
+    case ActionTypes.CHANGE_WINDOW:{
+      windowIndex = currentAction.index;
+      status = 1;
       break;
     }
   }
