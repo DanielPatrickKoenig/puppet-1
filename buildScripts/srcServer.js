@@ -6,8 +6,8 @@ let captureCount = 0;
 (async () => {
   browser = await puppeteer.launch({headless: false});
   // await navigate('https://www.github.com/login');
-  const username = 'DanielPatrickKoenig';
-  const password = 'K@!ch30nglu';
+  const username = '';
+  const password = '';
   const actions = [
     {
       actionType: ActionTypes.NAVIGATE,
