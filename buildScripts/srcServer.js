@@ -29,10 +29,7 @@ async function enterText(selector, text){
     status = 1;
   }
   catch(e){
-    // console.log(e);
-    setTimeout(async () => {
-      await enterText(selector, text);
-    }, 1000);
+    console.log(e);
   }
   return status;
 }
@@ -70,10 +67,7 @@ async function click(selector){
     status = 1;
   }
   catch(e){
-    // console.log(e);
-    setTimeout(async () => {
-      await click(selector);
-    }, 1000);
+    console.log(e);
   }
   return status;
   
