@@ -8,30 +8,38 @@ let captureCount = 0;
   await navigate('https://www.github.com/login');
 })();
 
-function getCurrentPage(){
-  return pages.length ? pages[pages.length - 1] : null;
+async function getCurrentPage(){
+  const pages = await browser.pages();
+  return pages[0];
 }
 
 async function navigate(url, newPage=false){
-  const page = await browser.newPage();
-  if(!getCurrentPage() || newPage){
-    pages.push(page);
-  }
-  await getCurrentPage().goto(url);
+  const pages = await browser.pages();
+  await pages[0].goto(url);
 }
 
 async function enterText(selector, text){
-  await getCurrentPage().type(selector, text);
+  const page = await getCurrentPage();
+  await page.type(selector, text);
 }
 
 async function click(selector){
-  const htmlEl = await getCurrentPage().$(selector);
-  await htmlEl.click();
+  const page = await getCurrentPage();
+  try{
+    const htmlEl = await page.$(selector);
+    await htmlEl.click();
+  }
+  catch(e){
+    setTimeout(() => {
+      click(selector);
+    }, 1000);
+  }
 }
 
 async function capture(){
   captureCount++;
-  await getCurrentPage().screenshot({ path: `capture-${captureCount}.png` });
+  const page = await getCurrentPage();
+  await page.screenshot({ path: `capture-${captureCount}.png` });
 }
 
 async function basicLogin({ usernameSelector, username}, { passwordSelector, password }, submitSelector){
